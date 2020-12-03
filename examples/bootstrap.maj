@@ -1,0 +1,113 @@
+;; -*- mode: lisp; mode: majestic; -*-
+
+;; defmac macro
+(def defmac
+  (mac (label lambda-list . body)
+       `(def ,label
+            (mac ,lambda-list ,@body))))
+
+;; defn macro
+(defmac defn (label lambda-list . body)
+  `(def ,label (fn ,lambda-list ,@body)))
+
+;; when macro
+(defmac when (pred . body)
+  `(if ,pred (do ,body) nil))
+
+;; unless macro
+(defmac unless (pred . body)
+  `(if (not ,pred) (do ,body) nil))
+
+;; cond macro
+(defmac cond clauses
+  (if (nilp clauses)
+      nil
+      `(if ,(caar clauses)
+           (do ,@(cdar clauses))
+           ,(if (nilp (cdr clauses))
+                nil
+                (cons 'cond (cdr clauses))))))
+
+;; let macro
+(defmac let (args . body)
+  ((fn (sepfn)
+     ((fn ((syms vals))
+        `((fn ,syms ,@body)
+          ,@vals))
+      (sepfn args nil nil sepfn)))
+   (fn (pairs syms vals recur)
+       (if (nilp pairs)
+           (list syms vals)
+           (recur (cdr pairs)
+                  (cons (caar pairs) syms)
+                  (cons (car (cdar pairs)) vals)
+                  recur)))))
+
+;; let* macro
+(defmac let* (clauses . body)
+  (if (nilp clauses)
+      (cons 'do body)
+      `(let (,(car clauses))
+         ,(if (nilp (cdr clauses))
+              (cons 'do body)
+              `(let* ,(cdr clauses)
+                 ,@body)))))
+
+;; letfn macro
+(defmac letfn (defs . body)
+  ((fn (sepfn)
+     ((fn ((syms vals))
+        `((fn ,syms ,@body)
+          ,@vals))
+      (sepfn defs nil nil sepfn)))
+   (fn (pairs syms vals recur)
+       (if (nilp pairs)
+           (list syms vals)
+           (recur (cdr pairs)
+                  (cons (caar pairs) syms)
+                  (cons (cons 'fn (cdar pairs)) vals)
+                  recur)))))
+
+;; letfn* macro
+(defmac letfn* (clauses . body)
+  (if (nilp clauses)
+      (cons 'do body)
+      `(letfn (,(car clauses))
+         ,(if (nilp (cdr clauses))
+              (cons 'do body)
+              `(letfn* ,(cdr clauses)
+                 ,@body)))))
+
+;; map function
+(defn map (f (x . xs))
+  (unless (nilp x)
+    (cons (f x)
+          (map f xs))))
+
+;; mapc function
+(defn mapc (f (x . xs))
+  (unless (nilp x)
+    (f x)
+    (mapc f xs)))
+
+;; assp function
+(defn assp (proc (x . xs))
+  (unless (nilp x)
+    (let (((key . rest) x))
+      (or (and (proc key) x)
+          (assp proc xs)))))
+
+;; assoc function
+(def *default-compare-fn* eq)
+(defn assoc (sym alist)
+  (assp (*default-compare-fn* sym) alist))
+
+;; What if the alist has numbers as keys? Well,
+;; (letfn ((*assoc-fn* (x y)
+;;           (= x y)))
+;;   (assoc 1 '((2 . a) (1 . b))))
+
+;; functionp function
+(defn functionp (f)
+  (or (primitivep f)
+      (closurep f)))

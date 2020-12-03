@@ -1,0 +1,40 @@
+(defn nth (n (x . xs))
+  (or (and (zerop n) x)
+      (nth (1- n) xs)))
+
+(let ((last-num 0))
+  (defn random (n)
+    (letrec ((get-rand ((bf . brest) (nf . nrest))
+               (cond (bf nf)
+                     ((not (nilp brest))
+                      (get-rand brest nrest))
+                     (t (1- n)))))
+      (let* ((nums (iota n))
+             (bools (map (fn (x) (coin)) nums)))
+        (let ((result (get-rand bools nums)))
+          (if (= result last-num)
+              (random n)
+              (do (set last-num result)
+                  result)))))))
+
+(def *descriptions*
+    '("Cursed"
+      "Blessed"
+      "Evil"
+      "Made by Gods"
+      "Should not be used at all"))
+
+;; nth, random
+(defmac getrandom (lst)
+  (let ((list-sym (gensym)))
+    `(let ((,list-sym ,lst))
+       (nth (random (length ,list-sym)) ,list-sym))))
+
+(defn make-language (names)
+  (map (fn (name)
+           (list name (getrandom *descriptions*)))
+       names))
+
+(print "{}"
+  (make-language '("C++"  "Java" "Lisp" "JavaScript"
+                   "Rust" "Go"   "Haskell")))

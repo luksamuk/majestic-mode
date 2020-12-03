@@ -1,0 +1,27 @@
+;; -*- mode: lisp; mode: majestic; -*-
+
+(print "Special variable test #1")
+
+(def *x* nil)
+
+(defn foo (n)
+  (when (< n 3)
+    (print-env 'lexical)
+    (print "x = {}" *x*)
+    (let ((*x* (1+ *x*)))
+      (foo (1+ *x*)))))
+
+(let ((*x* 5))
+  (foo 0))
+
+;; ==================================
+
+(print "Special variable test #2")
+
+(def *number* 10)
+
+(defn test (v)
+  (print "30 or 40? {}" (+ v *number*)))
+
+(let ((*number* 20))
+  (test *number*))

@@ -1,0 +1,4 @@
+#!/home/alchemist/.local/bin/majestic --script
+
+(print "Hello, {}!" 'Lucas)
+

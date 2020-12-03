@@ -1,0 +1,24 @@
+#+title: Emacs Major Mode for Majestic Lisp
+
+* Introduction
+
+This is a major mode for editing Majestic Lisp code.
+
+Majestic  Lisp is  a programming  language,  a dialect  of Lisp  built
+mostly for educational purposes. It  is inspired by Lisp dialects such
+as Bel, Common  Lisp and Clojure. It also draws  some inspiration from
+languages such as APL.
+
+* Syntax examples
+
+Many  code  examples are  on  the  directory  ~examples/~. The  code  is
+compatible with the current version  of Majestic Lisp (Version 0.3.0 +
+Build ac22fc0-master, nightly, at the time of this writing).
+
+* License
+
+All  code  files in  this  repository  are  provided through  the  MIT
+License. See LICENSE for details.
+
+Copyright (c) 2020 Lucas S. Vieira.
+

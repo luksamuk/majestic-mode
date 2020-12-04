@@ -17,16 +17,18 @@ Right now, ~majestic-mode~ features:
 - Spawning a Majestic process (still lacks customization);
 - ~defn~ / Full-expression evaluation;
 - Last-expression evaluation;
-- Marked region evaluation.
+- Marked region evaluation;
+- Org-babel evaluation support.
 
-|---------------------------------+--------------|
-| Action                          | Key          |
-|---------------------------------+--------------|
-| Start an ~*inferior-majestic*~    | ~M-x majestic~ |
-| Eval ~defn~ or current expression | ~C-c C-c~      |
-| Eval last expression            | ~C-c C-e~      |
-| Eval marked region              | ~C-c C-r~      |
-|---------------------------------+--------------|
+|---------------------------------+----------------------------------------|
+| Action                          | Key                                    |
+|---------------------------------+----------------------------------------|
+| Start an ~*inferior-majestic*~    | ~M-x majestic~                           |
+| Eval ~defn~ or current expression | ~C-c C-c~                                |
+| Eval last expression            | ~C-c C-e~                                |
+| Eval marked region              | ~C-c C-r~                                |
+| Eval code block (in Org Mode)   | ~C-c C-c~ (with pointer on source block) |
+|---------------------------------+----------------------------------------|
 
 * Installation
 

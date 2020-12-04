@@ -28,6 +28,7 @@
 (require 'imenu)
 (require 'comint)
 (require 'outline)
+(require 'org)
 
 (defcustom majestic-mode-hook '(turn-on-eldoc-mode)
   "Normal hook run when entering `majestic-mode'."
@@ -50,6 +51,9 @@
 
 (defvar *majestic-process* nil
   "Holds the process for Majestic.")
+
+(defvar *majestic-finished-processing* t
+  "Holds truth value for Majestic finishing to process input.")
 
 (defvar majestic-before-eval-functions nil
   "A list of functions called before evaluating a buffer or region.
@@ -232,6 +236,7 @@ region that will be evaluated.")
 ;; Start interactive
 (defun majestic ()
   (interactive)
+  (setq *majestic-finished-processing* t)
   (split-window-sensibly)
   (other-window 1)
   (setq *majestic-buffer* (generate-new-buffer "*inferior-majestic*"))
@@ -243,6 +248,8 @@ region that will be evaluated.")
                      "majestic"
                      nil
                      '())))
+
+;; Evaluation of code blocks
 
 (defun majestic-eval-defn ()
   (interactive)
@@ -285,14 +292,34 @@ region that will be evaluated.")
              fake-start end))
            (start (- fake-start 2)))
       (comint-kill-region start end)
-      (comint-send-string
+      (end-of-buffer)
+      (while (not *majestic-finished-processing*)
+        (sleep-for 0.01))
+      (setq *majestic-finished-processing* nil)
+      (comint-simple-send
        *majestic-process*
        (concat
-        (apply #'concat (s-lines string))
-        "\n"))
+        (apply #'concat (s-lines string))))
+      (while (not *majestic-finished-processing*)
+        (sleep-for 0.01))
+      (end-of-buffer)
+      (setq string
+            (buffer-substring-no-properties
+             start (- (point) 2)))
       (insert partial-input)
-      (end-of-buffer))))
+      (end-of-buffer)
+      string)))
 
+;; Org-babel support
+(add-to-list 'org-src-lang-modes '("majestic" . majestic))
+
+(defun org-babel-execute:majestic (body params)
+  (ignore params)
+  (majestic-eval-string body))
+
+(defun majestic--comint-output-filter (string)
+  (ignore string)
+  (setq *majestic-finished-processing* t))
 
 ;;;###autoload
 (define-derived-mode majestic-mode prog-mode "majestic"
@@ -303,7 +330,7 @@ region that will be evaluated.")
      (dolist (pair local-vars)
        (set (make-local-variable (car pair))
             (cdr pair))))
-   `((adaptive-fill-mode . nil)
+   `((adaptive-fill-mode . nil)     
      (fill-paragraph-function . lisp-fill-paragraph)
      (indent-line-function . lisp-indent-line)
      (lisp-indent-function . lisp-indent-function) ; todo!
@@ -317,7 +344,8 @@ region that will be evaluated.")
      (imenu-case-fold-search . t)
      (imenu-generic-expression . ,majestic-imenu-generic-expression)
      (mode-name . "Majestic")
-     (font-lock-defaults . ((majestic-font-lock-keywords))))))
+     (font-lock-defaults . ((majestic-font-lock-keywords)))
+     (comint-output-filter-functions . majestic--comint-output-filter))))
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.maj\\'" . majestic-mode))

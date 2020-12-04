@@ -15,8 +15,18 @@ Right now, ~majestic-mode~ features:
 
 - Syntax highlighting (partially);
 - Spawning a Majestic process (still lacks customization);
-- Sexp evaluation (with spawned process -- use ~C-c C-c~);
-- Marked region evaluation (use ~C-c C-r~).
+- ~defn~ / Full-expression evaluation;
+- Last-expression evaluation;
+- Marked region evaluation.
+
+|---------------------------------+--------------------|
+| Action                          | Key                |
+|---------------------------------+--------------------|
+| Start an ~*inferior-majestic*~    | ~M-x majestic-start~ |
+| Eval ~defn~ or current expression | ~C-c C-c~            |
+| Eval last expression            | ~C-c C-e~            |
+| Eval marked region              | ~C-c C-r~            |
+|---------------------------------+--------------------|
 
 * Installation
 

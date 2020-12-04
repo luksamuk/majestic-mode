@@ -9,6 +9,15 @@ mostly for educational purposes. It  is inspired by Lisp dialects such
 as Bel, Common  Lisp and Clojure. It also draws  some inspiration from
 languages such as APL.
 
+* Usage
+
+Right now, ~majestic-mode~ features:
+
+- Syntax highlighting (partially);
+- Spawning a Majestic process (still lacks customization);
+- Sexp evaluation (with spawned process);
+- Marked region evaluation.
+
 * Syntax examples
 
 Many  code  examples are  on  the  directory  ~examples/~. The  code  is

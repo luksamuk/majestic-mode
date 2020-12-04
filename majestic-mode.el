@@ -22,9 +22,12 @@
 
 ;; inspired by shen-mode
 ;; https://github.com/eschulte/shen-mode/blob/master/shen-mode.el
+;; and also inspired by code from Slime v2.26.
 
 (require 'lisp-mode)
 (require 'imenu)
+(require 'comint)
+(require 'outline)
 
 (defcustom majestic-mode-hook '(turn-on-eldoc-mode)
   "Normal hook run when entering `majestic-mode'."
@@ -37,6 +40,21 @@
     (set-keymap-parent map lisp-mode-shared-map)
     map)
   "Inherited modemap from `lisp-mode-shared-map'.")
+
+(progn
+  (define-key majestic-mode-map (kbd  "C-c C-c") 'majestic-eval-defn)
+  (define-key majestic-mode-map (kbd  "C-c C-r") 'majestic-eval-region))
+
+(defvar *majestic-buffer* nil
+  "Holds the buffer for Majestic.")
+
+(defvar *majestic-process* nil
+  "Holds the process for Majestic.")
+
+(defvar majestic-before-eval-functions nil
+  "A list of functions called before evaluating a buffer or region.
+The functions receive two arguments: the beginning and the end of the
+region that will be evaluated.")
 
 (defconst majestic-functions
   '((symbolp "x" "Check if object is symbol.")
@@ -208,6 +226,60 @@
 ;; Fix Emacs versions without a `prog-mode'
 (unless (fboundp 'prog-mode)
   (defalias 'prog-mode 'fundamental-mode))
+
+
+
+;; Evaluation on point
+(defun majestic-start ()
+  (interactive)
+  (split-window-sensibly)
+  (other-window 1)
+  (setq *majestic-buffer* (generate-new-buffer "*inferior-majestic*"))
+  (switch-to-buffer *majestic-buffer*)
+  (comint-mode)
+  (setq *majestic-process*
+        (comint-exec *majestic-buffer*
+                     "inferior-majestic"
+                     "majestic"
+                     nil
+                     '())))
+
+(defun majestic-eval-defn ()
+  (interactive)
+  (if (use-region-p)
+      (majestic-eval-region (region-beginning)
+                            (region-end))
+    (apply #'majestic-eval-region
+           (majestic-region-for-defn-at-point))))
+
+
+(defun majestic-eval-region (start end)
+  (interactive "r")
+  ;;(run-hook-with-args 'majestic-before-eval-functions start end)
+  (majestic-flash-region start end)
+  (majestic-eval-string
+   (buffer-substring-no-properties start end)))
+
+(defun majestic-flash-region (start end &optional timeout)
+  (let ((overlay (make-overlay start end)))
+    (overlay-put overlay 'face 'secondary-selection)
+    (run-with-timer (or timeout 0.2) nil 'delete-overlay overlay)))
+
+(defun majestic-region-for-defn-at-point ()
+  (save-excursion
+    (save-match-data
+      (end-of-defun)
+      (let ((end (point)))
+        (beginning-of-defun)
+        (list (point) end)))))
+
+(defun majestic-eval-string (string)
+  (process-send-string
+   *majestic-process*
+   (concat
+    (apply #'concat (s-lines string))
+    "\n")))
+
 
 ;;;###autoload
 (define-derived-mode majestic-mode prog-mode "majestic"

@@ -15,8 +15,21 @@ Right now, ~majestic-mode~ features:
 
 - Syntax highlighting (partially);
 - Spawning a Majestic process (still lacks customization);
-- Sexp evaluation (with spawned process);
-- Marked region evaluation.
+- Sexp evaluation (with spawned process -- use ~C-c C-c~);
+- Marked region evaluation (use ~C-c C-r~).
+
+* Installation
+
+Right now  this package  is too /beta/  to be on  MELPA, so  I recommend
+using [[https://github.com/dimitri/el-get][el-get]] to install it from GitHub.
+
+#+begin_src elisp
+(el-get-bundle luksamuk/majestic-mode)
+(require 'majestic-mode)
+#+end_src
+
+If  you want,  you  can update  it  from  time to  time  by using  ~M-x
+el-get-update~.
 
 * Syntax examples
 

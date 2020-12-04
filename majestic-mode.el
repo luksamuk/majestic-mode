@@ -229,8 +229,8 @@ region that will be evaluated.")
 
 
 
-;; Evaluation on point
-(defun majestic-start ()
+;; Start interactive
+(defun majestic ()
   (interactive)
   (split-window-sensibly)
   (other-window 1)

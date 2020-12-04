@@ -19,14 +19,14 @@ Right now, ~majestic-mode~ features:
 - Last-expression evaluation;
 - Marked region evaluation.
 
-|---------------------------------+--------------------|
-| Action                          | Key                |
-|---------------------------------+--------------------|
-| Start an ~*inferior-majestic*~    | ~M-x majestic-start~ |
-| Eval ~defn~ or current expression | ~C-c C-c~            |
-| Eval last expression            | ~C-c C-e~            |
-| Eval marked region              | ~C-c C-r~            |
-|---------------------------------+--------------------|
+|---------------------------------+--------------|
+| Action                          | Key          |
+|---------------------------------+--------------|
+| Start an ~*inferior-majestic*~    | ~M-x majestic~ |
+| Eval ~defn~ or current expression | ~C-c C-c~      |
+| Eval last expression            | ~C-c C-e~      |
+| Eval marked region              | ~C-c C-r~      |
+|---------------------------------+--------------|
 
 * Installation
 

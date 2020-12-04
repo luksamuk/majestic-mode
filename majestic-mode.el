@@ -301,7 +301,7 @@ region that will be evaluated.")
        (concat
         (apply #'concat (s-lines string))))
       (while (not *majestic-finished-processing*)
-        (sleep-for 0.01))
+        (sleep-for 0.2))
       (end-of-buffer)
       (setq string
             (buffer-substring-no-properties

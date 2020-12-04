@@ -255,7 +255,6 @@ region that will be evaluated.")
 
 (defun majestic-eval-region (start end)
   (interactive "r")
-  ;;(run-hook-with-args 'majestic-before-eval-functions start end)
   (majestic-flash-region start end)
   (majestic-eval-string
    (buffer-substring-no-properties start end)))
@@ -274,11 +273,25 @@ region that will be evaluated.")
         (list (point) end)))))
 
 (defun majestic-eval-string (string)
-  (process-send-string
-   *majestic-process*
-   (concat
-    (apply #'concat (s-lines string))
-    "\n")))
+  (save-excursion
+    (set-buffer *majestic-buffer*)
+    (end-of-buffer)
+    (let* ((end (point))
+           (fake-start
+            (progn (beginning-of-line)
+                   (point)))
+           (partial-input
+            (buffer-substring-no-properties
+             fake-start end))
+           (start (- fake-start 2)))
+      (comint-kill-region start end)
+      (comint-send-string
+       *majestic-process*
+       (concat
+        (apply #'concat (s-lines string))
+        "\n"))
+      (insert partial-input)
+      (end-of-buffer))))
 
 
 ;;;###autoload

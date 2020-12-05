@@ -321,6 +321,8 @@ region that will be evaluated.")
   (ignore string)
   (setq *majestic-finished-processing* t))
 
+(add-hook 'comint-output-filter-functions 'majestic--comint-output-filter)
+
 ;;;###autoload
 (define-derived-mode majestic-mode prog-mode "majestic"
   "Major mode for editing Majestic Lisp code."
@@ -345,6 +347,7 @@ region that will be evaluated.")
      (imenu-generic-expression . ,majestic-imenu-generic-expression)
      (mode-name . "Majestic")
      (font-lock-defaults . ((majestic-font-lock-keywords)))
+     (*majestic-finished-processing* . t)
      (comint-output-filter-functions . majestic--comint-output-filter))))
 
 ;;;###autoload

@@ -91,6 +91,7 @@ region that will be evaluated.")
     (type "x" "Get symbol representing the type of an object.")
     (intern "x" "Make new symbol from a string.")
     (name "x" "Get string name of symbol.")
+    (get-environment "type" "Get reference to lexical/global environment.")
     (open-stream "x dir" "Open stream path `x' with direction `dir'.")
     (close-stream "x" "Close stream.")
     ;; wrs, rds
@@ -109,9 +110,10 @@ region that will be evaluated.")
     (gensym "" "Generate a new symbol.")
     (terpri "" "Print newline to `*stdout*'.")
     (display "x" "Print object to `*stdout*'.")
-    ;; pretty-display
+    (pretty-display "x" "Pretty print object to `*stdout*'.")
     (print "fmt . rest" "Print formatted output to `*stdout*'")
     (load "path" "Evaluate source code from file.")
+    
     (number-coerce "x subtype" "Coerce number `x' to `subtype'.")
     (real-part "x" "Real part of complex number.")
     (imag-part "x" "Imaginary part of complex number.")
@@ -122,7 +124,7 @@ region that will be evaluated.")
     (\+ ". rest" "Neutral sum element; complex conjugate; sum numbers.")
     (\- ". rest" "Neutral difference element; number negation; subtract numbers.")
     (\* ". rest" "Neutral multiplication element; number signum; multiply numbers.")
-    (\/ ". rest" "Neutrla division element; number reciprocal; divide numbers.")
+    (\/ ". rest" "Neutral division element; number reciprocal; divide numbers.")
     (zerop "x" "Check if number is zero.")
     (iota "n" "Generate list of numbers ranging from 0 (inclusive) to `n' (exclusive).")
     (1\+ "x" "Increase number by one.")
@@ -138,7 +140,18 @@ region that will be evaluated.")
     ;; expt
     
     ;; car, cdr variations
-    
+    (first "x" "Get first part of cons cell.")
+    (rest "x" "Get second part of cons cell.")
+    (caar "x" "Get first element of first sub-list.")
+    (first-of-first "x" "Get first element of first sub-list.")
+    (cadr "x" "Get second element of list.")
+    (second "x" "Get second element of list.")
+    (cdar "x" "Get second part of the cons that is the first element of a list.")
+    (rest-of-first "x" "Get second part of the cons cell that is the first element of a list.")
+    (cddr "x" "Get the second rest of a list.")
+    (rest-of-rest "x" "Get the second rest of a list.")
+    (third "x" "Get third element of list.")
+    (fourth "x" "Get fourth element of list.")
     (map "f (x . xs)" "Map function over list, collecting results.")
     (mapc "f (x . xs)" "Map function over list, ignoring results.")
     (assp "proc (x . xs)" "Get association from alist where the first element befits `proc'.")
@@ -263,6 +276,7 @@ region that will be evaluated.")
 (defun majestic-eval-region (start end)
   (interactive "r")
   (majestic-flash-region start end)
+  (sleep-for 0.2)
   (majestic-eval-string
    (buffer-substring-no-properties start end)))
 
@@ -293,6 +307,29 @@ region that will be evaluated.")
            (start (- fake-start 2)))
       (comint-kill-region start end)
       (end-of-buffer)
+      (comint-simple-send
+       *majestic-process*
+       (concat
+        (apply #'concat (s-lines string))))
+      (insert partial-input))))
+
+;; Org-babel support
+(add-to-list 'org-src-lang-modes '("majestic" . majestic))
+
+(defun majestic-org-eval-string (string)
+  (save-excursion
+    (set-buffer *majestic-buffer*)
+    (end-of-buffer)
+    (let* ((end (point))
+           (fake-start
+            (progn (beginning-of-line)
+                   (point)))
+           (partial-input
+            (buffer-substring-no-properties
+             fake-start end))
+           (start (- fake-start 2)))
+      (comint-kill-region start end)
+      (end-of-buffer)
       (while (not *majestic-finished-processing*)
         (sleep-for 0.01))
       (setq *majestic-finished-processing* nil)
@@ -310,12 +347,9 @@ region that will be evaluated.")
       (end-of-buffer)
       string)))
 
-;; Org-babel support
-(add-to-list 'org-src-lang-modes '("majestic" . majestic))
-
 (defun org-babel-execute:majestic (body params)
   (ignore params)
-  (majestic-eval-string body))
+  (majestic-org-eval-string body))
 
 (defun majestic--comint-output-filter (string)
   (ignore string)
